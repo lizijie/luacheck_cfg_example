@@ -1,30 +1,34 @@
 -- .luacheckrc 文件其实就是个 lua 代码文件
 
+-- 限制行最大长度
+-- 执行样例: sh check.sh my_tools/luacheck/spec/samples/line_length.lua
+max_line_length = 100
+
 -- 缓存检查结果,下次检查时只扫描内容有变化的文件
 cache = true
 
 -- 是否检查变量重定义
--- 执行样例:sh check.sh my_tools/luacheck/spec/samples/redefined.lua
+-- 执行样例: sh check.sh my_tools/luacheck/spec/samples/redefined.lua
 redefined = true
 
  -- 是否输出警告编码
--- 执行样例:sh check.sh my_tools/luacheck/spec/samples/defined.lua
+-- 执行样例: sh check.sh my_tools/luacheck/spec/samples/defined.lua
 codes = true
 
 -- 是否警告无引用的方法参数或循环变量
--- 执行样例:sh check.sh my_tools/luacheck/spec/samples/unused_code.lua
+-- 执行样例: sh check.sh my_tools/luacheck/spec/samples/unused_code.lua
 -- unused_args = true
 
 -- 是否警告无引用的变量
--- 执行样例:sh check.sh my_tools/luacheck/spec/samples/unused_code.lua
+-- 执行样例: sh check.sh my_tools/luacheck/spec/samples/unused_code.lua
 --unused = true
 
 -- [原文解释](https://luacheck.readthedocs.io/en/0.12.0/warnings.html#secondary-values-and-variables)
 -- 没理解,感觉打开检查会更严格些
--- 执行样例:sh check.sh my_tools/luacheck/spec/samples/unused_secondaries.lua
+-- 执行样例: sh check.sh my_tools/luacheck/spec/samples/unused_secondaries.lua
 unused_secondaries = true
 
--- 执行样例:sh check.sh my_script/allow_defined_top.lua
+-- 执行样例: sh check.sh my_script/allow_defined_top.lua
 -- 是否允许在任何文件里定义全局变量
 allow_defined = false
 -- 是否只允许根作用域定义全局变量,除此以外定义会有警告
@@ -46,14 +50,14 @@ enable = {
 -- 排除检查的文件或目录
 exclude_files = {
     "my_3rd/", 
-    "my_tools/",
+    --"my_tools/",
     "**/.git/",
     ".my_temp/",
     --"^%./", -- TODO:排除.号开头的目录
 }
 
 -- 自定义全局变量
--- 执行样例:sh check.sh my_script/globals.lua
+-- 执行样例: sh check.sh my_script/globals.lua
 -- 方法1:
 -- 全局变量成员可同时读写
 globals = {
@@ -63,7 +67,7 @@ globals = {
 read_globals = {
     "G_TOP_READ_ONLY_TEST"
 }
--- 方法1:
+-- 方法2:
 -- 定义API检查集
 -- luacheck提供内置的API符号检查,具体见[Command line options](https://luacheck.readthedocs.io/en/stable/cli.html#command-line-options)
 -- 如下,使用了内置的lua53和lua53c的API符号集,以及自定义空间集my_script和my_tools
@@ -86,10 +90,33 @@ stds.my_tools = {
 
 -- 在上面ingore配置中,忽略了以`_`开头的所有警告
 -- 此处对于./my_sample/file_spec.lua, 需要打开警告
+-- 执行样例: sh check.sh ./my_sample/file_spec.lua
 files["./my_sample/file_spec.lua"] = {
     enable = {"^_"}
 }
 --./my_sample/file_spec_dir目录下,文件格式是`file_*`,都打开以`_`开头的所有警告
+-- 执行样例: sh check.sh ./my_sample/file_spec_dir
 files["./my_sample/file_spec_dir/file_*"] = {
     enable = {"^_"}
 }
+
+-- 内联配置
+-- 执行样例: sh check.sh ./my_tools/luacheck/spec/samples/inline_options.lua
+-- 内联配置是在Lua代码注释嵌入luacheck配置。注释的前段必需要是`luacheck:`开头，后接配置参数。
+-- 1. 如果内联注释，所在行含有要运行的lua代码，则配置仅对此行生效
+--local function f()
+--   qu() -- luacheck: globals qu
+--   qu() -- (W113) accessing undefined variable qu
+--end
+-- 2. 如果内部注释，所在行没有lua代码，则配置仅在当前作用域生效
+-- luacheck: ignore foo
+-- local function f()
+--    foo()
+--    -- luacheck: globals baz
+--    baz()
+--    baz()
+-- end
+-- baz() -- (W113) accessing undefined variable baz
+
+-- 参考
+-- 1. https://github.com/Nexela/Factorio-luacheckrc/blob/master/.luacheckrc

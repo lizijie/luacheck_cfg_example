@@ -1,0 +1,4 @@
+[submodule "my_tools/luacheck"]
+	path = my_tools/luacheck
+	url = https://github.com/mpeterv/luacheck.git
+	branch = master
